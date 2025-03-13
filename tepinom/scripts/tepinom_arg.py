@@ -1,3 +1,4 @@
+import os
 import argparse
 import pandas as pd
 import numpy as np
@@ -207,6 +208,14 @@ def parse_args():
     parser.add_argument('epitope_file', type=str, help="Path to the CSV file containing epitopes data.")
     parser.add_argument('hla_file', type=str, help="Path to the CSV file containing HLA allele frequency data.")
     
+    # New argument for output file suffix
+    parser.add_argument('--out_suffix', type=str, default='', 
+                        help="Suffix for output file names (e.g., 'test' will produce output files like 'tepinom_output_filtered_test.txt').")
+
+    # New argument for output directory
+    parser.add_argument('--out_dir', type=str, default='.', 
+                        help="Directory to save output files (default: current directory). The directory will be created if it doesn't exist.")
+    
     # Optional arguments with descriptions
     parser.add_argument('--median_ba_rank', type=float, default=1.0, 
                         help="Rank cutoff for binding affinity (default: 1.0). Only epitopes with a median binding rank lower than this value are selected.")
@@ -221,6 +230,7 @@ def parse_args():
 
     return parser.parse_args()
 
+# Main function
 def main():
     args = parse_args()
 
@@ -233,8 +243,12 @@ def main():
     print(f"Maximum number of epitopes: {args.max_epitopes}")
     print(f"Prioritize protein diversity: {args.prioritize_protein_diversity}")
     print(f"Binding affinity rank hit threshold: {args.ba_rank_hit}")
+    print(f"Output directory: {args.out_dir}")
+    print(f"Output file suffix: {args.out_suffix}")
 
-    # Rest of the code continues as before...
+    # Create the output directory if it doesn't exist
+    os.makedirs(args.out_dir, exist_ok=True)
+
     print("Loading inputs...")
     proteins = load_protein_sequences(args.protein_fasta)
     epitopes, hla_cols = load_epitopes(args.epitope_file)
@@ -246,7 +260,10 @@ def main():
 
     # Calculate conservation scores for each epitope
     print("Calculating conservation scores...")
-    epitopes['conservation_score'] = epitopes.apply(lambda row: calculate_conservation_score(row['epitope_sequence'], row['protein'], proteins), axis=1)
+    epitopes['conservation_score'] = epitopes.apply(
+        lambda row: calculate_conservation_score(row['epitope_sequence'], row['protein'], proteins), 
+        axis=1
+    )
 
     # Filtering by median binding affinity
     print("Filtering by median binding affinity...")
@@ -259,25 +276,34 @@ def main():
 
     # Optimizing population coverage
     print("Optimizing population coverage...")
-    optimized_epitopes = optimize_population_coverage(filtered_epitopes, hla_frequencies, args.max_epitopes, args.prioritize_protein_diversity, args.ba_rank_hit)
+    optimized_epitopes = optimize_population_coverage(
+        filtered_epitopes, hla_frequencies, args.max_epitopes, 
+        args.prioritize_protein_diversity, args.ba_rank_hit
+    )
 
     # Calculating population coverage for optimized epitopes
     print("Calculating population coverage for selected epitopes...")
-    population_coverage_df = calculate_population_coverage(optimized_epitopes, hla_frequencies, args.ba_rank_hit)
+    population_coverage_df = calculate_population_coverage(
+        optimized_epitopes, hla_frequencies, args.ba_rank_hit
+    )
+
+    # Define suffix and output paths
+    suffix = f"_{args.out_suffix}" if args.out_suffix else ""
+    out_dir = args.out_dir
 
     # Saving unfiltered epitopes (all the original epitopes)
     print("Saving unfiltered output file...")
     unfiltered_epitopes = epitopes[['epitope_sequence', 'protein', 'conservation_score', 'median_binding_rank'] + hla_cols]
-    save_output_file(unfiltered_epitopes, "tepinom_output_unfiltered.txt")
+    save_output_file(unfiltered_epitopes, os.path.join(out_dir, f"tepinom_output_unfiltered{suffix}.txt"))
 
     # Saving filtered epitopes (those that passed the filters)
     print("Saving filtered output file...")
     filtered_epitopes = filtered_epitopes[['epitope_sequence', 'protein', 'conservation_score', 'median_binding_rank'] + hla_cols]
-    save_output_file(filtered_epitopes, "tepinom_output_filtered.txt")
+    save_output_file(filtered_epitopes, os.path.join(out_dir, f"tepinom_output_filtered{suffix}.txt"))
 
     # Saving population coverage output
     print("Saving population coverage output...")
-    save_output_file(population_coverage_df, "tepinom_output_popcov.txt")
+    save_output_file(population_coverage_df, os.path.join(out_dir, f"tepinom_output_popcov{suffix}.txt"))
 
 if __name__ == "__main__":
     main()
