@@ -22,7 +22,7 @@ def load_epitopes(epitope_file):
         print(f"Error loading epitope file: {e}")
         sys.exit(1)
 
-    hla_cols = [col for col in epitopes.columns if col.startswith('HLA_')]
+    hla_cols = [col for col in epitopes.columns if col.startswith('HLA-')]
     return epitopes, hla_cols
 
 # Function to load HLA frequencies from a CSV file
@@ -39,9 +39,9 @@ def load_hla_frequencies(hla_file):
 # Normalize the HLA frequencies within each class (HLA-A, HLA-B, HLA-C)
 def normalize_hla_frequencies(hla_frequencies):
     # Separate HLA frequencies by class
-    hla_A = {key: val for key, val in hla_frequencies.items() if key.startswith('HLA_A')}
-    hla_B = {key: val for key, val in hla_frequencies.items() if key.startswith('HLA_B')}
-    hla_C = {key: val for key, val in hla_frequencies.items() if key.startswith('HLA_C')}
+    hla_A = {key: val for key, val in hla_frequencies.items() if key.startswith('HLA-A')}
+    hla_B = {key: val for key, val in hla_frequencies.items() if key.startswith('HLA-B')}
+    hla_C = {key: val for key, val in hla_frequencies.items() if key.startswith('HLA-C')}
 
     # Normalize frequencies for each class
     def normalize_class(frequencies):
@@ -151,31 +151,31 @@ def calculate_population_coverage(epitopes, hla_frequencies, hla_rank_cutoff):
 
         for hla in hla_frequencies:
             if epitope.get(hla, 100) <= hla_rank_cutoff:
-                if hla.startswith('HLA_A'):
+                if hla.startswith('HLA-A'):
                     covered_hla_a.add(hla)
                     total_hla_a_covered.add(hla)
-                elif hla.startswith('HLA_B'):
+                elif hla.startswith('HLA-B'):
                     covered_hla_b.add(hla)
                     total_hla_b_covered.add(hla)
-                elif hla.startswith('HLA_C'):
+                elif hla.startswith('HLA-C'):
                     covered_hla_c.add(hla)
                     total_hla_c_covered.add(hla)
 
         # Calculate the epitope coverage within each HLA class
-        epitope_data['HLA_A'] = sum(hla_frequencies[h] for h in covered_hla_a)
-        epitope_data['HLA_B'] = sum(hla_frequencies[h] for h in covered_hla_b)
-        epitope_data['HLA_C'] = sum(hla_frequencies[h] for h in covered_hla_c)
+        epitope_data['HLA-A'] = sum(hla_frequencies[h] for h in covered_hla_a)
+        epitope_data['HLA-B'] = sum(hla_frequencies[h] for h in covered_hla_b)
+        epitope_data['HLA-C'] = sum(hla_frequencies[h] for h in covered_hla_c)
 
         # Calculate population coverage based on the frequencies of covered alleles
-        total_coverage = epitope_data['HLA_A'] + epitope_data['HLA_B'] + epitope_data['HLA_C']
+        total_coverage = epitope_data['HLA-A'] + epitope_data['HLA-B'] + epitope_data['HLA-C']
         epitope_data['population_coverage'] = (total_coverage / sum(hla_frequencies.values())) * 100
         
         coverage_data.append(epitope_data)
 
     # Calculate the overall combination coverage based on unique alleles covered
-    total_unique_hla_a = sum(1 for h in hla_frequencies if h.startswith('HLA_A'))
-    total_unique_hla_b = sum(1 for h in hla_frequencies if h.startswith('HLA_B'))
-    total_unique_hla_c = sum(1 for h in hla_frequencies if h.startswith('HLA_C'))
+    total_unique_hla_a = sum(1 for h in hla_frequencies if h.startswith('HLA-A'))
+    total_unique_hla_b = sum(1 for h in hla_frequencies if h.startswith('HLA-B'))
+    total_unique_hla_c = sum(1 for h in hla_frequencies if h.startswith('HLA-C'))
 
     # Compute percentages of unique alleles covered
     combo_coverage_a = (len(total_hla_a_covered) / total_unique_hla_a) * 100 if total_unique_hla_a > 0 else 0
@@ -190,9 +190,9 @@ def calculate_population_coverage(epitopes, hla_frequencies, hla_rank_cutoff):
     # Add the combination row to the output
     combination_row = {
         'epitope_sequence': 'combination',
-        'HLA_A': combo_coverage_a,
-        'HLA_B': combo_coverage_b,
-        'HLA_C': combo_coverage_c,
+        'HLA-A': combo_coverage_a,
+        'HLA-B': combo_coverage_b,
+        'HLA-C': combo_coverage_c,
         'population_coverage': total_combination_coverage
     }
     coverage_data.append(combination_row)

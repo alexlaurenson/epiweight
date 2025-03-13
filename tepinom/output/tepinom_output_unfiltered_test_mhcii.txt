@@ -1,4 +1,4 @@
-epitope_sequence	protein	conservation_score	median_binding_rank	HLA-A_01:01	HLA-B_07:02	HLA-C_07:01	HLA-A_02:01	HLA-B_08:01	HLA-C_06:02
+epitope_sequence	protein	conservation_score	median_binding_rank	DRB1_01:01	HLA-DPA1_07:02	HLA-DQA1_07:01	DRB1_02:01	HLA-DPA1_08:01	HLA-DQA1_06:02
 GAYWNHRRKS	PfRipr	0.2	1.395	1.72	0.84	0.13	2.59	1.29	1.5
 SVNRTGAYWNHR	PfRipr	0.2	1.63	1.85	1.41	2.13	2.11	1.12	0.67
 AAGNGYVRGF	PfRipr	0.6	1.27	1.39	1.37	1.17	0.2	0.41	1.78
