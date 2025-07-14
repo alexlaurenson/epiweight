@@ -11,7 +11,7 @@ EpiWeight provides methods for:
 - **Ensuring diversity** in selected epitopes by considering protein sources and avoiding overlapping sequences.
 - **Normalizing HLA allele frequencies** within each HLA class for fair optimization.
 
-The primary tools in this repository are **TepiNom** for general epitope selection and optimization, with two separate scripts for MHC I and MHC II alleles:
+The primary tools in this repository are **TepiNom (Patent Pending)** for general epitope selection and optimization, with two separate scripts for MHC I and MHC II alleles:
 - **`tepinom_mhci_arg.py`** – for **MHC Class I** epitope selection targeting **CD8+ T-cell epitopes** (HLA-A, HLA-B, HLA-C coverage).
 - **`tepinom_mhcii_arg.py`** – for **MHC Class II** epitope selection targeting **CD4+ T-cell epitopes** (HLA-DRB1, HLA-DQ, HLA-DP coverage).
 
