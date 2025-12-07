@@ -10,7 +10,7 @@ EpiWeight provides methods for:
 - Optimizing epitope selection to maximize population coverage while minimizing redundancy
 - Ensuring diversity in selected epitopes by considering protein sources and avoiding overlapping sequences
 - Identifying optimal protein regions for vaccine design
-- Calculating population coverage metrics using phenotypic frequency
+- Calculating exact population coverage using phenotypic frequencies
 
 ## Tools in This Repository
 
@@ -21,7 +21,7 @@ The latest iteration of TepiNom provides a single, refactored script (`tepinom_1
 - **Two optimization modes:**
   - **Combo mode**: Select optimal epitope combinations for maximum population coverage
   - **Region mode**: Identify protein regions with highest immunogenic potential using sliding windows
-- **Computed phenotypic frequency** for population coverage calculations
+- **Phenotypic frequency-based population coverage** for accurate prevalence calculations
 - **High-risk HLA prioritization** with configurable weights
 - **Protein diversity constraints** to avoid redundant epitope selection
 - **Adaptive region selection**: Automatically returns all regions achieving 100% coverage, or top N if none reach 100%
@@ -44,7 +44,7 @@ TepiNom uses Integer Linear Programming to optimize epitope selection by:
    - Conservation scores across protein variants
    
 2. **Optimizing** selections to:
-   - Maximize population coverage
+   - Maximize population coverage using phenotypic frequency calculations
    - Consider intra-locus and inter-locus HLA coverage
    - Apply weights to high-risk or priority HLA alleles
    - Enforce protein diversity (optional)
