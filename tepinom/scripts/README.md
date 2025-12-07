@@ -329,9 +329,9 @@ If you use TepiNom in your research, please cite:
 
 ## Version History
 
-- **v1.6** (2024): Unified refactored version with improved code organization
-- **v1.5** (2024): Added region search capabilities
-- **v1.0-1.4** (2023): Original MHC I/II separate scripts
+- **v1.6**: Unified refactored version with improved code organization
+- **v1.5**: Added region search capabilities
+- **v1.0-1.4**: Original MHC I/II separate scripts
 
 ## License
 
