@@ -1,85 +1,178 @@
 # EpiWeight
+A Toolkit for Epitope Selection and Population Coverage Optimization
 
-### A Toolkit for Epitope Selection and Population Coverage Optimization
-
-Welcome to **EpiWeight**! This repository contains tools for **epitope downselection and optimization**, particularly focusing on **T-cell epitope selection** based on binding affinity, population coverage, and conservation.
+Welcome to EpiWeight! This repository contains tools for epitope downselection and optimization, particularly focusing on T-cell epitope selection based on binding affinity, population coverage, and conservation.
 
 ## Overview
+
 EpiWeight provides methods for:
-- **Filtering epitopes** based on binding affinity thresholds for specific **HLA alleles**.
-- **Optimizing epitope selection** to **maximize population coverage** while minimizing redundancy.
-- **Ensuring diversity** in selected epitopes by considering protein sources and avoiding overlapping sequences.
-- **Normalizing HLA allele frequencies** within each HLA class for fair optimization.
+- Filtering epitopes based on binding affinity thresholds for specific HLA alleles
+- Optimizing epitope selection to maximize population coverage while minimizing redundancy
+- Ensuring diversity in selected epitopes by considering protein sources and avoiding overlapping sequences
+- Identifying optimal protein regions for vaccine design
+- Calculating population coverage metrics using phenotypic frequency
 
-The primary tools in this repository are **TepiNom (Patent Pending)** for general epitope selection and optimization, with two separate scripts for MHC I and MHC II alleles:
-- **`tepinom_mhci_arg.py`** – for **MHC Class I** epitope selection targeting **CD8+ T-cell epitopes** (HLA-A, HLA-B, HLA-C coverage).
-- **`tepinom_mhcii_arg.py`** – for **MHC Class II** epitope selection targeting **CD4+ T-cell epitopes** (HLA-DRB1, HLA-DQ, HLA-DP coverage).
+## Tools in This Repository
 
-## TepiNom: Epitope Downselection & Population Optimization
+### TepiNom 1.6 (Patent Pending) - **Unified ILP Optimization Tool**
+The latest iteration of TepiNom provides a single, refactored script (`tepinom_1.6.py`) that handles both MHC Class I and MHC Class II epitope optimization using Integer Linear Programming (ILP).
 
-**TepiNom** is designed to help researchers select **optimal epitope combinations** by filtering candidates based on:
-- **Binding Affinity** – Only considering epitopes with strong predicted binding to specific **HLA alleles** (based on user-defined rank cutoffs).
-- **Conservation** – Filtering out poorly conserved epitopes across protein variants.
-- **Population Coverage** – Prioritizing epitopes that **cover the highest proportion** of a target population.
-- **Avoiding Redundancy** – Ensuring non-overlapping sequences within the same protein and prioritizing diverse HLA coverage.
+**Key Features:**
+- **Two optimization modes:**
+  - **Combo mode**: Select optimal epitope combinations for maximum population coverage
+  - **Region mode**: Identify protein regions with highest immunogenic potential using sliding windows
+- **Computed phenotypic frequency** for population coverage calculations
+- **High-risk HLA prioritization** with configurable weights
+- **Protein diversity constraints** to avoid redundant epitope selection
+- **Adaptive region selection**: Automatically returns all regions achieving 100% coverage, or top N if none reach 100%
+- Support for both MHC Class I (CD8+ T-cell epitopes: HLA-A, HLA-B, HLA-C) and MHC Class II (CD4+ T-cell epitopes: DRB1, DPA1, DQA1)
 
-### How It Works
-TepiNom takes as input:
-- **Protein sequences** (FASTA file)
-- **Epitope predictions** (CSV file with binding affinity data)
-- **HLA allele frequencies** (CSV file with population frequency data)
+See [tepinom/README.md](tepinom/README.md) for detailed documentation.
 
-It processes these inputs to **select the best epitope combination** and outputs:
-- **Filtered epitopes** (based on binding affinity & conservation)
-- **Optimized epitope list** (maximizing population coverage)
-- **Population coverage statistics** (per HLA class and overall)
+### Legacy Tools
+- `tepinom_mhci_arg.py` – Original MHC Class I epitope selection script
+- `tepinom_mhcii_arg.py` – Original MHC Class II epitope selection script
 
-### Input Files
-1. **Protein Sequences:** `proteins.fasta`
-2. **Epitope Predictions:** `epitopes.csv`
-3. **HLA Frequencies:** `hla_frequencies.csv`
+*Note: These are maintained for backward compatibility. New projects should use `tepinom_1.6.py`.*
 
-### Output Files
-1. `tepinom_output_unfiltered.txt`: **All input epitopes** (before filtering).
-2. `tepinom_output_filtered.txt`: **Epitopes that pass filtering** (based on affinity and conservation).
-3. `tepinom_output_popcov.txt`: **Optimized epitope selection with population coverage details**.
+## How TepiNom Works
 
-## Installation & Usage
-Clone the repository and navigate to the project directory:
+TepiNom uses Integer Linear Programming to optimize epitope selection by:
 
-`git clone https://github.com/alexlaurenson/epiweight`<br>
-`cd epiweight`
+1. **Filtering** epitopes based on:
+   - Binding affinity to HLA alleles (rank-based thresholds)
+   - Conservation scores across protein variants
+   
+2. **Optimizing** selections to:
+   - Maximize population coverage
+   - Consider intra-locus and inter-locus HLA coverage
+   - Apply weights to high-risk or priority HLA alleles
+   - Enforce protein diversity (optional)
+   
+3. **Region Analysis** (optional):
+   - Identify contiguous protein regions with high immunogenic potential
+   - Use sliding windows of customizable sizes (e.g., 50aa, 100aa, 200aa)
+   - Rank regions by population coverage
 
-### Running TepiNom for MHC Class I Epitope Selection (CD8+ T-cells)
-`python tepinom_mhcii_arg.py proteins.fasta epitopes.csv hla_frequencies.csv <rank_cutoff> <conservation_cutoff> <max_epitopes> <prioritize_different_proteins> <hla_rank_cutoff>`
+## Quick Start
 
-Example:
-`python tepinom_mhci_arg.py proteins.fasta epitopes.csv hla_frequencies.csv 2.0 0.7 10 1 0.5`
+### Installation
+```bash
+git clone https://github.com/alexlaurenson/epiweight
+cd epiweight
+```
 
-Where:
-- `rank_cutoff` = Max binding affinity rank for filtering (e.g., `2.0`)
-- `conservation_cutoff` = Min conservation score required (e.g., `0.7`)
-- `max_epitopes` = Max number of selected epitopes (e.g., `10`)
-- `prioritize_different_proteins` = Whether to enforce epitope diversity across proteins (`1` for True, `0` for False)
-- `hla_rank_cutoff` = Threshold for an epitope to be considered for an HLA allele
+**Dependencies:**
+```bash
+pip install pandas numpy pulp
+```
 
-## Example Output (Population Coverage Report)
-| epitope_sequence | HLA_A | HLA_B | HLA_C | population_coverage |
-|------------------|-------|-------|-------|---------------------|
-| SHNGFWSVP        | 0.75  | 0.85  | 0.50  | 87.0                |
-| KGVNINSPKPV      | 0.60  | 0.80  | 0.40  | 80.5                |
-| MARTYGSA         | 0.55  | 0.30  | 0.90  | 67.8                |
-| combination      | 0.95  | 0.92  | 0.85  | 98.2                |
+**Solver Required:** TepiNom requires the CBC (COIN-OR Branch and Cut) solver for ILP optimization.
+- Ubuntu/Debian: `sudo apt-get install coinor-cbc`
+- macOS: `brew install coin-or-tools/coinor/cbc`
+- Windows: Download from [COIN-OR website](https://www.coin-or.org/download/binary/Cbc/)
 
+### Basic Usage Examples
 
-- **Each epitope's coverage** is reported for **HLA-A, HLA-B, and HLA-C** categories for MHC Class I or **HLA-DRB1, HLA-DQ, and HLA-DP** categories for MHC Class II.
-- **Final combination row** shows the **unique** HLA coverage across the entire selected epitope set.
+#### Epitope Combination Optimization (MHC I)
+```bash
+python3 tepinom_1.6.py \
+  epitopes.txt \
+  hla_frequencies.txt \
+  --postfilter \
+  --mhc_class i \
+  --goal combo \
+  --ba_rank_hit 0.5 \
+  --max_epitopes 20 \
+  --out_dir output/
+```
+
+#### Region-Based Search (MHC II, 100aa windows)
+```bash
+python3 tepinom_1.6.py \
+  epitopes.txt \
+  hla_frequencies.txt \
+  --postfilter \
+  --mhc_class ii \
+  --goal region \
+  --window_size 100 \
+  --ba_rank_hit 1.0 \
+  --out_dir output/
+```
+
+#### With High-Risk HLA Prioritization
+```bash
+python3 tepinom_1.6.py \
+  epitopes.txt \
+  hla_frequencies.txt \
+  --postfilter \
+  --mhc_class i \
+  --goal combo \
+  --ba_rank_hit 0.5 \
+  --high_risk_hlas HLA-A*29:02,HLA-A*30:01 \
+  --hla_weight 5.0 \
+  --out_dir output/
+```
+
+## Input File Formats
+
+### Epitope File (TSV, postfilter format)
+```
+Epitope	Position	ConservationScore	Source	Stage	HLA-A*01:01	HLA-A*02:01	...
+SHNGFWSVP	145	0.95	Protein1	Sporozoite	0.3	1.2	...
+KGVNINSPK	289	0.88	Protein2	Liver	2.1	0.4	...
+```
+
+### HLA Frequency File (TSV)
+```
+HLA-A*01:01	0.1234
+HLA-A*02:01	0.2456
+HLA-B*07:02	0.0987
+```
+
+## Output Files
+
+### Combo Mode
+- `optimized_epitopes_*.tsv`: Selected epitopes with individual coverage metrics
+- `population_coverage_*.tsv`: Progression showing coverage for increasing epitope counts
+
+### Region Mode
+- `region_coverage_*.tsv`: Top protein regions ranked by coverage
+- `optimized_epitopes_region_*.tsv`: All epitopes from top regions with individual metrics
+
+## Example Output (Population Coverage)
+```
+Num_Epitopes	Best_Combination	HLA-A_Cov_pct	HLA-B_Cov_pct	HLA-C_Cov_pct	Total_Cov_pct
+1	SHNGFWSVP	45.23	38.67	22.45	72.35
+2	SHNGFWSVP,KGVNINSPK	67.89	58.92	41.23	88.47
+3	SHNGFWSVP,KGVNINSPK,MARTYGSA	78.45	72.34	55.67	94.28
+```
+
+## Advanced Features
+
+- **Protein diversity enforcement**: Use `--prioritize_protein_diversity` to select at most one epitope per protein
+- **Hard constraints**: Use `--hard_constraint` to require coverage of specified high-risk HLAs
+- **Adaptive region selection**: Automatically identifies all regions with 100% coverage (region mode only)
+- **Conservation filtering**: Set minimum conservation scores with `--conservation_score`
 
 ## Contributing
-Want to improve **TepiNom** or add new features? Feel free to **fork this repo**, submit **pull requests**, or open **issues** for discussions.
+
+Want to improve EpiWeight or add new features? Feel free to fork this repo, submit pull requests, or open issues for discussions.
+
+## Citation
+
+If you use TepiNom in your research, please cite:
+```
+[Citation details to be added]
+```
 
 ## License
-EpiWeight is licensed under the **Apache 2.0**.
+
+EpiWeight is licensed under the Apache 2.0 License.
 
 ## Contact & Support
-Have questions? Found a bug? Feel free to open an **issue** or reach out!
+
+Have questions? Found a bug? Feel free to open an issue or reach out!
+
+**Maintainer:** Alex Laurenson  
+**Repository:** https://github.com/alexlaurenson/epiweight
